@@ -6,30 +6,24 @@ use warnings;
 use Test::More;
 
 use Exception::StringBased (
-    'PermissionException',
-    'Permission2Exception' => { flags => [ qw(Frontend Login Password) ] }
+  PermissionException => [ qw(login password) ],
+  'PermissionException2',
 );
 
+my $e = PermissionException->new(qw(login));
+print Dumper($e); use Data::Dumper;
 
- 
-    'AnotherException' => [ qw( Retryable) ],
+# PermissionException->raise(qw(login));
+# PermissionException->raise(qw(flag1 flag2) );
 
-    'YetAnotherException' => {
-        isa         => 'AnotherException',
-        description => 'These exceptions are related to IPC'
-    },
- 
-    'ExceptionWithFields' => {
-        isa    => 'YetAnotherException',
-        fields => [ 'grandiosity', 'quixotic' ],
-        alias  => 'throw_fields',
-    },
-);
+# Type->Exception::raise(@args);
 
+print " plop : " . $e->flag::login() . "\n";
+print " plop : " . $e->flag::password() . "\n";
 
+my $e2 = PermissionException2->new();
+print Dumper($e2); use Data::Dumper;
 
-MyException->throw("Invalid password")
+print " plop2 : " . $e2->flag::login() . "\n";
 
-my $e = Exception::new->()
-raise
-Exception::raise
+done_testing();
