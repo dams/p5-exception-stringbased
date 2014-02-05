@@ -17,20 +17,33 @@ is( exception { Exception::StringBased->import() },
      "no types is good" );
 
 like( exception { Exception::StringBased->import(undef) },
-      qr/is invalid/,
+      qr/type '<undef>' is invalid/,
       "dies when type undef" );
 
 like( exception { Exception::StringBased->import('1plop') },
-      qr/is invalid/,
+      qr/type '1plop' is invalid/,
       "dies when type starts with number" );
 
 like( exception { Exception::StringBased->import('|plop') },
-      qr/is invalid/,
+      qr/type '|plop' is invalid/,
       "dies when type contains |" );
 
 like( exception { Exception::StringBased->import('pl op') },
-      qr/is invalid/,
+      qr/type 'pl op' is invalid/,
       "dies when type contains space" );
+
+like( exception { Exception::StringBased->import(Foo => ['1plop']) },
+      qr/flag '1plop' is invalid/,
+      "dies when flag starts with number" );
+
+like( exception { Exception::StringBased->import(Foo => ['|plop']) },
+      qr/flag '\|plop' is invalid/,
+      "dies when flag contains |" );
+
+like( exception { Exception::StringBased->import(Foo => ['pl op']) },
+      qr/flag 'pl op' is invalid/,
+      "dies when flag contains space" );
+
 
 is_deeply( \%PermissionException::Flags,
            { login => 1,
@@ -43,8 +56,13 @@ is_deeply( \%PermissionException::Flags,
     is($e, '[PermissionException||]This is the text', "exception without flags looks good");
     is_deeply([$e->get::flags()], [], "exception contains no flags");
     is_deeply([$e->possible::flags], [qw(login password)], "listing possible flags");
-    is_deeply([PermissionException->possible::flags], [qw(login password)], "listing possible flags");
+    is_deeply([PermissionException->possible::flags], [qw(login password)], "possible flags");
+    ok($e->is::a('PermissionException'), "exception isa PermissionException");
+    is($e->get::type(), 'PermissionException', "exception type is ok");
+    ok(! $e->is::a('PermissionException2'), "exception is not a PermissionException2");
+    ok($e->is::a('Exception::StringBased'), "exception is a Exception::StringBased");
 }
+
 {
     my $e = PermissionException->new('This is the text')
       ->set::login
@@ -86,20 +104,12 @@ is_deeply( \%PermissionException::Flags,
           "exception2 with invalid flag" );
 }
 
-
-
-
-# # PermissionException->raise(qw(login));
-# # PermissionException->raise(qw(flag1 flag2) );
-
-# # Type->Exception::raise(@args);
-
-# print STDERR " plop : " . $e->flag::login() . "\n";
-# print STDERR " plop : " . $e->flag::password() . "\n";
-
-# my $e2 = PermissionException2->new();
-# print STDERR Dumper($e2); use Data::Dumper;
-
-# print STDERR " plop2 : " . $e2->flag::login() . "\n";
+{
+    eval { PermissionException->throw('This is the text', qw(login password)) }
+    or do { my $e = $@;
+            ok($e->is::a('PermissionException'), "exception is of right type");
+            is($e->get::type(), 'PermissionException', "exception type is ok");
+        };
+}
 
 done_testing();

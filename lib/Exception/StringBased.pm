@@ -13,17 +13,20 @@ my $type_r = qr/^([^|\s0-9][^|\s]*)$/;
 my $flag_r = qr/^([^|\s0-9][^|\s]*)$/;
 
 no strict 'refs';
+no warnings qw(once);
+
+my %registered;
 
 sub import {
     my $class = shift;
  
     while ( scalar @_ ) {
         my $type = shift;
-        ($type // '') =~ $type_r or _croak_type($type);
+        ($type // '') =~ $type_r or _croak(type => $type);
+        $registered{$type} = 1;
         @{"${type}::ISA"} = $class;
-        no warnings qw(once);
         %{"${type}::Flags"} = map { $_ => 1 } my @f = ref $_[0]
-          ? map { ( ($_ // '') =~ $flag_r)[0] // croak "flag '" . ($_ // '<undef>') . "' is invalid" } @{shift()}
+          ? map { ( ($_ // '') =~ $flag_r)[0] // _croak(flag => $_) } @{shift()}
           : ();
         foreach my $f (@f) {
             my $match = "|$f|";
@@ -47,11 +50,20 @@ sub import {
     }
 }
 
+sub _croak { croak $_[0] . " '" . ($_[1] // '<undef>') . "' is invalid" }
+
+# Class methods
+
 sub new {
     my ($type, $message, @flags) = @_;
-    '['  . ( (($type // '') =~ $type_r)[0] // croak_type($type) ) .
-     '|' . join('|', grep { ${"${type}::Flags"}{$_} or croak "invalid flag '$_', exception type '$type' didn't declare it" } @flags) . '|]' . ($message // '');
+    $registered{$type} or croak "exception type '$type' has not been registered yet";
+    '[' . $type . '|' . join('|', grep { ${"${type}::Flags"}{$_} or croak "invalid flag '$_', exception type '$type' didn't declare it" } @flags) . '|]' . ($message // '');
 }
+
+sub raise { croak shift->new(@_)}
+sub throw { croak shift->new(@_)}
+
+# fake methods
 
 sub set::flags {
     my (undef, @flags) = @_;
@@ -59,108 +71,34 @@ sub set::flags {
     $_[0];
 }
 
-sub _croak_type { croak "type '" . ($_[0] // '<undef>') . "' is invalid" }
-
-
 sub get::flags {
-    my ($type, undef, $flags) = ($_[0] // '') =~ $header_r or croak 'Argument is not an StringBased exception';
-    sort grep { ${"${type}::Flags"}{$_} or croak "exception string contains invalid flag '$_'" } split(/\|/, $flags);
+    my ($type, undef, $flags) = ($_[0] // '') =~ $header_r
+      or croak 'Argument is not an StringBased exception';
+    sort grep {
+        ${"${type}::Flags"}{$_} or croak "exception string contains invalid flag '$_'"
+    } split(/\|/, $flags);
 }
 
 sub possible::flags {
     my ($type) = ($_[0] // '') =~ $header_r;
     $type //= $_[0] // '';
-
-    ($type // 'NotAValidClass')->isa('Exception::StringBased')
+    ($type // 'NotAValidClass')->isa(__PACKAGE__)
       or croak 'Argument is not a StringBased exception or a StringBased class';
     sort keys %{"${type}::Flags"};
 }
 
-#sub flags::list {
-#    my $type = ( ($_[0] // '' ) =~ $header_r)[0] // croak 'Argument is not an StringBased exception';
-#    split('|', sort keys %{"${type}::Flags"};
-#}
-
-
-
-
-
-sub raise($;@) {
-    my ($type, @flags) = @_;
-    my $string = '[|' . join('|', @_) . '|]';
-    print  "$string\n";
-
+sub get::type {
+    my ($type) = ($_[0] // '') =~ $header_r
+      or croak 'Argument is not an StringBased exception';
+    $type;
 }
 
-
-# sub exception::isa {
-#     my ($e, $type) = @_;
-#     ${$type}
-#       or croak "";
-#     ( ($e =~$header_r)[0] // return '') eq $type;
-# }
+sub is::a {
+    my ($type) = ($_[0] // '') =~ $header_r
+      or croak 'Argument is not an StringBased exception';
+    $type->isa($_[1]);
+}
 
 
 1;
 
-# sub
-
-#     my $version_name = 'VERSION';
- 
-#     my $code = <<"EOPERL";
-# package $subclass;
- 
-# use base qw($isa);
- 
-# our \$$version_name = '1.1';
- 
-# 1;
- 
-# EOPERL
- 
-#     if ( $def->{description} ) {
-#         ( my $desc = $def->{description} ) =~ s/([\\\'])/\\$1/g;
-#         $code .= <<"EOPERL";
-# sub description
-# {
-#     return '$desc';
-# }
-# EOPERL
-#     }
- 
-#     my @fields;
-#     if ( my $fields = $def->{fields} ) {
-#         @fields = UNIVERSAL::isa( $fields, 'ARRAY' ) ? @$fields : $fields;
- 
-#         $code
-#             .= "sub Fields { return (\$_[0]->SUPER::Fields, "
-#             . join( ", ", map { "'$_'" } @fields )
-#             . ") }\n\n";
- 
-#         foreach my $field (@fields) {
-#             $code .= sprintf( "sub %s { \$_[0]->{%s} }\n", $field, $field );
-#         }
-#     }
- 
-#     if ( my $alias = $def->{alias} ) {
-#         die "Cannot make alias without caller"
-#             unless defined $Exception::Class::Caller;
- 
-#         no strict 'refs';
-#         *{"$Exception::Class::Caller\::$alias"}
-#             = sub { $subclass->throw(@_) };
-#     }
- 
-#     if ( my $defaults = $def->{defaults} ) {
-#         $code
-#             .= "sub _defaults { return shift->SUPER::_defaults, our \%_DEFAULTS }\n";
-#         no strict 'refs';
-#         *{"$subclass\::_DEFAULTS"} = {%$defaults};
-#     }
- 
-#     eval $code;
- 
-#     die $@ if $@;
- 
-#     $CLASSES{$subclass} = 1;
-# }
