@@ -57,10 +57,11 @@ is_deeply( \%PermissionException::Flags,
     is_deeply([$e->get::flags()], [], "exception contains no flags");
     is_deeply([$e->possible::flags], [qw(login password)], "listing possible flags");
     is_deeply([PermissionException->possible::flags], [qw(login password)], "possible flags");
-    ok($e->is::a('PermissionException'), "exception isa PermissionException");
+    ok($e->is::of::type('PermissionException'), "exception isa PermissionException");
     is($e->get::type(), 'PermissionException', "exception type is ok");
-    ok(! $e->is::a('PermissionException2'), "exception is not a PermissionException2");
-    ok($e->is::a('Exception::StringBased'), "exception is a Exception::StringBased");
+    ok(! $e->is::of::type('PermissionException2'), "exception is not a PermissionException2");
+    ok($e->is::of::type('Exception::StringBased'), "exception is a Exception::StringBased");
+    is($e->get::message, "This is the text", "exception is a Exception::StringBased");
 }
 
 {
@@ -107,9 +108,14 @@ is_deeply( \%PermissionException::Flags,
 {
     eval { PermissionException->throw('This is the text', qw(login password)) }
     or do { my $e = $@;
-            ok($e->is::a('PermissionException'), "exception is of right type");
+            ok($e->is::of::type('PermissionException'), "exception is of right type");
             is($e->get::type(), 'PermissionException', "exception type is ok");
         };
+}
+
+{
+    my $e = PermissionException2->new('This is the text');
+    ok($e->is::an::exception, "it's an exception");
 }
 
 done_testing();
