@@ -56,6 +56,7 @@ sub new {
 sub set::flags {
     my (undef, @flags) = @_;
     &{"set::$_"}($_[0]) foreach @flags;
+    $_[0];
 }
 
 sub _croak_type { croak "type '" . ($_[0] // '<undef>') . "' is invalid" }
