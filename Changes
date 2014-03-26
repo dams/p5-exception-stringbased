@@ -1,4 +1,5 @@
 {{$NEXT}}
+   * more improvements. Now simply uses the x:: package prefix, configurable
 
 0.11      2014-02-25 16:58:55 Europe/Amsterdam
 
