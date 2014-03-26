@@ -36,17 +36,17 @@ use Carp;
 
       # you can build exception step by step
       my $e = ExceptionWithFields->new("The error message");
-      $e->$_field(quixotic => "some_value");
-      $e->$_throw();
+      $e->x::field(quixotic => "some_value");
+      $e->x::throw();
   
   }
   catch {
-      if ( $_->$_isa('Exception::Stringy') ) {
-          warn $_->$_error, "\n";
+      if ( $_->x::isa('Exception::Stringy') ) {
+          warn $_->x::error, "\n";
       }
   
-      if ( $_->$_isa('ExceptionWithFields') ) {
-          if ( $e->_field('quixotic') ) {
+      if ( $_->x::isa('ExceptionWithFields') ) {
+          if ( $_->x::field('quixotic') ) {
               handle_quixotic_exception();
           }
           else {
@@ -54,7 +54,7 @@ use Carp;
           }
       }
       else {
-          $_->$_rethrow;
+          $_->x::rethrow;
       }
   };
    
@@ -106,7 +106,7 @@ it's was once 'MyException'.
 Using C<Exception::Stringy>, exceptions are regular strings, that embed in
 themselves a small pattern to contain their properties. They can be
 stringified, concatenated, and tampered with in any way, as long as the pattern
-isn'tremoved (it can be moved inside the string though).
+isn't removed (it can be moved inside the string though).
 
 As a result, exceptions are more robust, while still retaining all features
 you'd expect from similar modules like L<Exception::Class>
@@ -119,8 +119,8 @@ you'd expect from similar modules like L<Exception::Class>
   try {
     MyException->throw("foo");
   } catch {
-    die "this is not a Exception::Stringy" unless $_->$_isa('Exception::Stringy');
-    if ($_->$_isa('MyException')) { ... }
+    die "this is not a Exception::Stringy" unless $_->x::isa('Exception::Stringy');
+    if ($_->x::isa('MyException')) { ... }
   };
 
 =head1 BASIC USAGE
@@ -148,7 +148,7 @@ Here are the details about what can be in the exception definitions:
 =head3 class name
 
 The keys of the definition's hash are reggular class name string, with an
-exception: they cannot start with an underscore ( C<_> ), keys starting with an
+exception: they cannot start with a underscore ( C<_> ), keys starting with an
 underscore are reserved for options specification (see L<ADVANCED OPTIONS>);
 
 =head3 isa
@@ -158,7 +158,7 @@ Expects a name (Str). If set, the exception will inherit from the given name.
 =head3 fields
 
 Expects a list of field names (ArrayRef). If set, the exceptions will be able
-to set/get these fields.
+to set/get these fields. Fields values should be short scalars (no references).
 
 =head3 alias
 
@@ -179,15 +179,15 @@ registered exception can be updated.
 
   eval { ... 1; } or do {
     my $e = $@;
-    if ($e->$_isa('Exception::Stringy')) {
-      if ($e->$_isa('ExceptionWithFields')) {
+    if ($e->x::isa('Exception::Stringy')) {
+      if ($e->x::isa('ExceptionWithFields')) {
         ...
-      } elsif ($e->$_isa('YetAnotherException')) {
+      } elsif ($e->x::isa('YetAnotherException')) {
         ...
       }
     } else {
       # this works on anything, even objects or bare strings
-      e->$_rethrow;
+      e->x::rethrow;
     }
   };
 
@@ -199,11 +199,11 @@ registered exception can be updated.
   ExceptionWithFields->throw("error message", grandiosity => 42);
   ExceptionWithFields->raise("error message", grandiosity => 42);
 
-Creates an string exception from the given class, with the error message and
+Creates a string exception from the given class, with the error message and
 fields, then throws the exception. The exception is thrown using C<croak()>
 from the C<Carp> module.
 
-The error message is always the first argument If ommited, it'll default to
+The error message is always the first argument. If ommited, it'll default to
 empty string. Optional fields are provided as flat key / value pairs.
 
 =head2 new
@@ -229,44 +229,44 @@ Returns the exceptions classes that have been registered.
 
 The syntax is a bit strange, but that's because exceptions are bare strings,
 and not blessed references, so we have to use a trick to have the arrow syntax
-working ( thanks to pokki for the hint ).
+working.
 
-By default, the methods are prefixed by C<x> (mnemonic: eXception) but you can
-change that by specifying an other C<_methods_prefix> (see L<ADVANCED OPTIONS>
-below)
+By default, the methods are in the C<x> package (mnemonic: eXception) but you
+can change that by specifying an other C<_package_prefix> (see L<ADVANCED
+OPTIONS> below)
 
-=head2 $xthrow(), $xrethrow(), $xraise()
+=head2 x::throw(), x::rethrow(), x::raise()
 
-  $exception->$xthrow();
-  $exception->$xrethrow();
-  $exception->$xraise();
+  $exception->x::throw();
+  $exception->x::rethrow();
+  $exception->x::raise();
 
 Throws the exception.
 
-=head2 $xclass()
+=head2 x::class()
 
-  my $class = $exception->$xclass();
+  my $class = $exception->x::class();
 
 Returns the exception class name.
 
-=head2 $xisa()
+=head2 x::isa()
 
-  if ($exception->$xisa('ExceptionClass')) {... }
+  if ($exception->x::isa('ExceptionClass')) {... }
 
 Returns true if the class of the given exception C<->isa()> the class given in
 parameter.
 
-=head2 $xfields()
+=head2 x::fields()
 
-  my @fields = $exception->$xfields();
+  my @fields = $exception->x::fields();
 
 Returns the list of field names that are in the exception.
 
-=head2 $xfield()
+=head2 x::field()
 
-  my $value = $exception->$xfield('field_name');
+  my $value = $exception->x::field('field_name');
 
-  $exception->$xfield(field_name => $value);
+  $exception->x::field(field_name => $value);
 
 Set or get the given field. If the value contains one of these forbidden
 caracters, then it is transparently base64 encoded and decoded.
@@ -289,13 +289,13 @@ C<\034>, the 0x28 seperator ASCII caracter.
 
 =back
 
-=head2 $xmessage(), $xerror()
+=head2 x::message(), x::error()
 
-  my $text = $exception->$xmessage();
-  my $text = $exception->$xerror();
+  my $text = $exception->x::message();
+  my $text = $exception->x::error();
 
-  $exception->$xmessage("Error message");
-  $exception->$xerror("Error message");
+  $exception->x::message("Error message");
+  $exception->x::error("Error message");
 
 Set or get the error message of the exception
 
@@ -304,30 +304,30 @@ Set or get the error message of the exception
 
   use Exception::Stringy (
       MyException => { ... },
-      _methods_prefix => '_x_',
+      _package_prefix => 'exception',
   );
 
-  my $e = $MyException->new("error message");
-  say $e->$_x_message();
+  my $e = MyException->new("error message");
+  say $e->exception::message();
 
 When C<use>-ing this module, you can specify special keys that starts with an
 underscore ( C<_> ). They will be interpreted as options. Currently these
 special keys can be:
 
-=head3 _methods_prefix
+=head3 _package_prefix
 
 If set, pseudo methods imported in the calling methods use the specified
-prefix. By default, it is C<x>, so methods will look like:
+package prefix. By default, it is C<x>, so methods will look like:
 
-  $e->$xthrow();
-  $e->$xfields();
+  $e->x::throw();
+  $e->x::fields();
   ...
 
-But if you specify _methods_prefix to be C<some_prefix_> then imported pseudo
+But if you specify _package_prefix to be C<exception> then imported pseudo
 methods will be like this:
 
-  $e->$some_prefix_throw();
-  $e->$some_prefix_fields();
+  $e->exception::throw();
+  $e->exception::fields();
   ...
 
 =cut
@@ -375,12 +375,12 @@ sub _decode {
 sub import {
     my $class = shift;
     my $caller = caller;
-    my $methods_prefix = 'x';
+    my $package_prefix = 'x';
     while ( scalar @_ ) {
         my $klass = shift;
         ($klass // '') =~ $klass_r or _croak(class => $klass);
-        $klass eq '_methods_prefix' and
-          $methods_prefix = shift, next;
+        $klass eq '_package_prefix' and
+          $package_prefix = shift, next;
         my $isa = $class;
         my ($override, %fields);
       # for ( (1)x!! ( my $r = ref $_[0] )) {
@@ -409,13 +409,12 @@ sub import {
         $registered{$klass} = 1;
     }
 
-    *{"${caller}::$methods_prefix$_"} = $symbols{$_} foreach keys %symbols;
-    foreach (keys %aliases) {
-        my $v = $aliases{$_};
-        $caller->can($_)
-          or *{"${caller}::$_"} = sub { $v->new(@_)->throw() };
-    }
-    
+    say("${package_prefix}::$_"), *{"${package_prefix}::$_"} = ${$symbols{$_}} foreach keys %symbols;
+    foreach my $k (keys %aliases) {
+        my $v = $aliases{$k};
+        $caller->can($k)
+          or *{"${caller}::$k"} = sub { $v->new(@_)->throw() };
+    }    
 }
 
 sub _croak { croak $_[0] . " '" . ($_[1] // '<undef>') . "' is invalid" . ($_[2] ? ". $_[2]" : '') }

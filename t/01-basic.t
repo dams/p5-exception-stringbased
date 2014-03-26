@@ -65,49 +65,49 @@ is_deeply( \%PermissionException::Fields,
 {
     my $e = PermissionException->new('This is the text');
     is($e, '[PermissionException||]This is the text', "exception without fields looks good");
-    is_deeply([ $e->$xfields ], [], "exception contains no fields");
-    is_deeply([ $e->$xfields ], [], "exception contains no fields");
-    is_deeply([ sort $e->$xclass->registered_fields ],
+    is_deeply([ $e->x::fields ], [], "exception contains no fields");
+    is_deeply([ $e->x::fields ], [], "exception contains no fields");
+    is_deeply([ sort $e->x::class->registered_fields ],
               [ qw(login password) ], "listing possible fields");
-    ok($e->$xisa('PermissionException'), "exception isa PermissionException");
-    is($e->$xclass, 'PermissionException', "exception class is ok");
-    ok(! $e->$xisa('PermissionException2'), "exception is not a PermissionException2");
-    ok($e->$xisa('Exception::Stringy'), "exception is a Exception::Stringy");
-    is($e->$xmessage, "This is the text", "exception has the right message");
+    ok($e->x::isa('PermissionException'), "exception isa PermissionException");
+    is($e->x::class, 'PermissionException', "exception class is ok");
+    ok(! $e->x::isa('PermissionException2'), "exception is not a PermissionException2");
+    ok($e->x::isa('Exception::Stringy'), "exception is a Exception::Stringy");
+    is($e->x::message, "This is the text", "exception has the right message");
 }
 
 {
     my $e = PermissionException->new('This is the text');
-    $e->$xfield(login => 1);
-    $e->$xfield(password => 1);
+    $e->x::field(login => 1);
+    $e->x::field(password => 1);
     is($e, '[PermissionException|login:1|password:1|]This is the text',
        "exception + fields looks good");
-    is_deeply([sort $e->$xfields], [qw(login password)],
+    is_deeply([sort $e->x::fields], [qw(login password)],
               "exception contains the right fields" );
 }
 
 {
     my $e = PermissionException->new('This is the text');
-    $e->$xfield(login => 1);
-    $e->$xfield(password => 1);
+    $e->x::field(login => 1);
+    $e->x::field(password => 1);
     is($e, '[PermissionException|login:1|password:1|]This is the text',
        "exception + fields looks good");
-    is_deeply([sort $e->$xfields], [qw(login password)],
+    is_deeply([sort $e->x::fields], [qw(login password)],
               "exception contains the right fields");
 }
 
 {
     my $e = PermissionException->new('This is the text', login => 1, password => 1);
-    is_deeply([sort $e->$xfields], [qw(login password)],
+    is_deeply([sort $e->x::fields], [qw(login password)],
               "exception contains the right fields");
 }
 
 {
     my $e = PermissionException->new('This is the text', login => 1);
     is($e, '[PermissionException|login:1|]This is the text', "exception + fields looks good");
-    ok($e->$xfield('login'), "exception has login");
-    ok(!$e->$xfield('password'), "exception doesn't have login");
-    is_deeply([sort $e->$xfields], [qw(login)], "exception contains the right fields");
+    ok($e->x::field('login'), "exception has login");
+    ok(!$e->x::field('password'), "exception doesn't have login");
+    is_deeply([sort $e->x::fields], [qw(login)], "exception contains the right fields");
 }
 
 {
@@ -117,57 +117,57 @@ is_deeply( \%PermissionException::Fields,
     $e = PermissionException->new('This is the text', login => "");
     is($e, '[PermissionException|login:|]This is the text',
        "exception string with login empty");
-    is($e->$xfield('login'), '',
+    is($e->x::field('login'), '',
        "login is empty");
     $e = PermissionException->new('This is the text', login => "in base \034 64");
     is($e, "[PermissionException|login:\034aW4gYmFzZSAcIDY0|]This is the text",
        "exception + fields looks good");
-    is($e->$xfield('login'), "in base \034 64",
+    is($e->x::field('login'), "in base \034 64",
        "exception + field properly decodes");
     $e = PermissionException->new('This is the text', login => ":should be base64");
     is($e, "[PermissionException|login:\034OnNob3VsZCBiZSBiYXNlNjQ=|]This is the text",
        "exception + fields looks good");
-    is($e->$xfield('login'), ":should be base64",
+    is($e->x::field('login'), ":should be base64",
        "exception + field properly decodes");
     $e = PermissionException->new('This is the text', login => "should be| base64");
     is($e, "[PermissionException|login:\034c2hvdWxkIGJlfCBiYXNlNjQ=|]This is the text",
        "exception + fields looks good");
-    is($e->$xfield('login'), "should be| base64",
+    is($e->x::field('login'), "should be| base64",
        "exception + field properly decodes");
 }
 
 {
     my $e = PermissionException->new();
-    $e->$xerror('This is the text');
-    $e->$xfield(login => 'foobarbaz');
+    $e->x::error('This is the text');
+    $e->x::field(login => 'foobarbaz');
     is($e, '[PermissionException|login:foobarbaz|]This is the text',
        "login is normal");
-    $e->$xfield(login => "");
+    $e->x::field(login => "");
     is($e, '[PermissionException|login:|]This is the text',
        "exception string with login empty");
-    is($e->$xfield('login'), '',
+    is($e->x::field('login'), '',
        "login is empty");
-    $e->$xfield( login => "in base \034 64");
+    $e->x::field( login => "in base \034 64");
     is($e, "[PermissionException|login:\034aW4gYmFzZSAcIDY0|]This is the text",
        "exception + fields looks good");
-    is($e->$xfield('login'), "in base \034 64",
+    is($e->x::field('login'), "in base \034 64",
        "exception + field properly decodes");
-    $e->$xfield( login => ":should be base64");
+    $e->x::field( login => ":should be base64");
     is($e, "[PermissionException|login:\034OnNob3VsZCBiZSBiYXNlNjQ=|]This is the text",
        "exception + fields looks good");
-    is($e->$xfield('login'), ":should be base64",
+    is($e->x::field('login'), ":should be base64",
        "exception + field properly decodes");
-    $e->$xfield( login => "should be| base64");
+    $e->x::field( login => "should be| base64");
     is($e, "[PermissionException|login:\034c2hvdWxkIGJlfCBiYXNlNjQ=|]This is the text",
        "exception + fields looks good");
-    is($e->$xfield('login'), "should be| base64",
+    is($e->x::field('login'), "should be| base64",
        "exception + field properly decodes");
 }
 
 {
     my $e = PermissionException2->new('This is the text');
     is($e, '[PermissionException2||]This is the text', "exception2 without fields looks good");
-    is_deeply([$e->$xfields], [], "exception contains no fields");
+    is_deeply([$e->x::fields], [], "exception contains no fields");
 }
 
 {
@@ -179,15 +179,15 @@ is_deeply( \%PermissionException::Fields,
 {
     eval { PermissionException->throw('This is the text', qw(login password)) }
     or do { my $e = $@;
-            ok($e->$xisa('PermissionException'), "exception is of right class");
-            ok($e->$xisa('Exception::Stringy'), "exception inherits Exception::Stringify");
-            is($e->$xclass, 'PermissionException', "exception class is ok");
+            ok($e->x::isa('PermissionException'), "exception is of right class");
+            ok($e->x::isa('Exception::Stringy'), "exception inherits Exception::Stringify");
+            is($e->x::class, 'PermissionException', "exception class is ok");
         };
 }
 
 {
     my $e = PermissionException2->new('This is the text');
-    ok($e->$xisa('Exception::Stringy'), "it's an exception");
+    ok($e->x::isa('Exception::Stringy'), "it's an exception");
 }
 
 done_testing;
