@@ -177,6 +177,7 @@ registered exception can be updated.
 
 =head2 catching and checking exceptions
 
+  use Exception::Stringy;
   eval { ... 1; } or do {
     my $e = $@;
     if ($e->$xisa('Exception::Stringy')) {
