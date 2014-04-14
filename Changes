@@ -1,4 +1,5 @@
 {{$NEXT}}
+   * implement isa properly, added test
 
 0.13      2014-04-10 17:43:44 Europe/Amsterdam
 
