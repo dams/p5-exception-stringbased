@@ -23,7 +23,7 @@ use Carp;
       },
   );
   
-  ## with Try::Tiny
+  ### with Try::Tiny
   
   use Try::Tiny;
    
@@ -58,7 +58,7 @@ use Carp;
       }
   };
    
-  # without Try::Tiny
+  ### without Try::Tiny
    
   eval {
       # ...
