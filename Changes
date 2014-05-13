@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+   * now xisa works on blessed references as well
+
 0.14      2014-04-14 12:25:13 Europe/Amsterdam
    * implement isa properly, added test
 
