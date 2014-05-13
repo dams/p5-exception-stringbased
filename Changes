@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+   * rename _package_prefix into _method_prefix
+
 0.15      2014-05-13 12:51:00 Europe/Amsterdam
 
    * now xisa works on blessed references as well
