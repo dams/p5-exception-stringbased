@@ -335,7 +335,27 @@ C<\034>, the 0x28 seperator ASCII caracter.
 
 Set or get the error message of the exception
 
-=head1 MIXING WITH EXCEPTION OBJECTS
+=head1 GOOD PRACTISES
+
+=head2 exceptions declaration
+
+It's often useful to gather exceptions declarations in a common module. You can
+easily do that, because declaring new exceptions is decoupled from C<use>-ing
+the module. All you need is to implement a module that uses
+C<<Exception::Stringy->declare_exceptions(...)>> one or more times. Other
+modules can then use this module. Note however that they also will have to
+C<use> C<Exception::Stringy> to have pseudo-methods imported in their
+namespaces.
+
+=head2 exceptions naming
+
+It's recommended to use normal class names, with a common prefix, like
+C<MyException::Network::Connection>, and to reflect the inheritance
+relationship within the name. So C<MyException::Networking::Connection> would
+inherit from C<MyException::Networking>. Multiple inheritance or roles aren't
+provided by this package.
+
+=head2 mixing with exception objects
 
 Sometimes, you'll have to work with some of the exceptions being
 C<Exception::Stringy> exceptions, and some other exceptions being objects
