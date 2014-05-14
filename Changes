@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+   * changed API: exceptions are not declared at import time, but with declare_exceptions
+
 0.16      2014-05-13 13:07:23 Europe/Amsterdam
 
    * rename _package_prefix into _method_prefix
