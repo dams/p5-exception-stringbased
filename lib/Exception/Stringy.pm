@@ -207,6 +207,10 @@ The pseudo methods (see below) are loaded when C<use>-ing the C<Exception::Strin
 
 =head1 CLASS METHODS
 
+=head2 declare_exceptions
+
+See L<BASIC USAGE> above.
+
 =head2 raise, throw
 
   # both are exactly the same
@@ -595,3 +599,4 @@ $_symbol_error = $_symbol_message;
 
 1;
 
+=for Pod::Coverage Fields dor
