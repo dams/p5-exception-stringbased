@@ -173,9 +173,17 @@ to set/get these fields. Fields values should be short scalars (no references).
 
 =head3 throw_alias
 
+Expects a function name (Str). If set, the user will be able to use this
+function as a shortcut to throw the exception. From the example above,
+C<throw_fields(...)> will be equivalent to C<<ExceptionWithFields->throw(...)>>
+
+=head3 name_alias
+
 Expects a function name (Str). If set, the user will be able to use this name
-as a class method, as a shortcut. From the example above,
-C<throw_fields->(...)> will be equivalent to C<ExceptionWithFields->throw(...)>
+as an alias for the class name. Warning, if you use it, make sure to enclose
+the C<declare_exceptions> call in a C<BEGIN> block, otherwise the alias won't
+be available in the rest of the file (it will however be available in other
+modules loading it)
 
 =head3 override
 
@@ -421,6 +429,7 @@ no warnings qw(once);
 
 my %registered;
 my %throw_aliases;
+my %name_aliases;
 
 use MIME::Base64;
 
@@ -457,6 +466,12 @@ sub import {
         $caller->can($k)
           or *{"${caller}::$k"} = sub { $v->throw(@_) };
     }
+
+    foreach my $k (keys %name_aliases) {
+        my $v = $name_aliases{$k};
+        $caller->can($k)
+          or *{"${caller}::$k"} = sub () { $v };
+    }
 }
 
 sub declare_exceptions {
@@ -483,6 +498,12 @@ sub declare_exceptions {
                   and _croak(throw_alias => $throw_alias, 'It has already been defined');
                 $throw_aliases{$throw_alias} = $klass;
             }
+
+            if (length(dor( my $name_alias = $h{name_alias}, ''))) {
+                defined $name_aliases{$name_alias}
+                  and _croak(name_alias => $name_alias, 'It has already been defined');
+                $name_aliases{$name_alias} = $klass;
+            }
         }
 
         ! $override && $registered{$klass}
@@ -498,6 +519,12 @@ sub declare_exceptions {
         my $v = $throw_aliases{$k};
         $caller->can($k)
           or *{"${caller}::$k"} = sub { $v->throw(@_) };
+    }
+
+    foreach my $k (keys %name_aliases) {
+        my $v = $name_aliases{$k};
+        $caller->can($k)
+          or *{"${caller}::$k"} = sub () { $v };
     }
 
 }
