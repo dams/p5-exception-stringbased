@@ -21,7 +21,7 @@ use Carp;
       'ExceptionWithFields' => {
           isa    => 'YetAnotherException',
           fields => [ 'grandiosity', 'quixotic' ],
-          alias  => 'throw_fields',
+          throw_alias  => 'throw_fields',
       },
   );
   
@@ -33,7 +33,7 @@ use Carp;
       # throw an exception
       MyException->throw('I feel funny.');
   
-      # or use an aliase
+      # or use an alias
       throw_fields 'Error message', grandiosity => 1;
 
       # or with fields
@@ -143,7 +143,7 @@ Defining exception classes is done by calling C<declare_exceptions>:
     'ExceptionWithFields' => {
           isa    => 'MyException',
           fields => [ qw(field1 field2) ],
-          alias  => 'throw_fields',
+          throw_alias  => 'throw_fields',
     },
   );
 
@@ -171,7 +171,7 @@ exception class, and add its own fields. Only simple inlheritance is supported.
 Expects a list of field names (ArrayRef). If set, the exceptions will be able
 to set/get these fields. Fields values should be short scalars (no references).
 
-=head3 alias
+=head3 throw_alias
 
 Expects a function name (Str). If set, the user will be able to use this name
 as a class method, as a shortcut. From the example above,
@@ -420,7 +420,7 @@ no strict 'refs';
 no warnings qw(once);
 
 my %registered;
-my %aliases;
+my %throw_aliases;
 
 use MIME::Base64;
 
@@ -452,8 +452,8 @@ sub import {
         *{"${caller}::${method_prefix}$_"} = \${"${class}::_symbol_$_"}
         } foreach @symbols;
 
-    foreach my $k (keys %aliases) {
-        my $v = $aliases{$k};
+    foreach my $k (keys %throw_aliases) {
+        my $v = $throw_aliases{$k};
         $caller->can($k)
           or *{"${caller}::$k"} = sub { $v->throw(@_) };
     }
@@ -478,10 +478,10 @@ sub declare_exceptions {
               @{ dor($h{fields}, []) };
             $h{isa} and $isa = $h{isa};
 
-            if (length(dor( my $alias = $h{alias}, ''))) {
-                defined $aliases{$alias}
-                  and _croak(alias => $alias, 'It has already been defined');
-                $aliases{$alias} = $klass;
+            if (length(dor( my $throw_alias = $h{throw_alias}, ''))) {
+                defined $throw_aliases{$throw_alias}
+                  and _croak(throw_alias => $throw_alias, 'It has already been defined');
+                $throw_aliases{$throw_alias} = $klass;
             }
         }
 
@@ -494,8 +494,8 @@ sub declare_exceptions {
         $registered{$klass} = 1;
     }
 
-    foreach my $k (keys %aliases) {
-        my $v = $aliases{$k};
+    foreach my $k (keys %throw_aliases) {
+        my $v = $throw_aliases{$k};
         $caller->can($k)
           or *{"${caller}::$k"} = sub { $v->throw(@_) };
     }
