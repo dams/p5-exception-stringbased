@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.19      2014-05-22 10:08:28 Europe/Amsterdam
+
   * rethrow properly propagate original exception throw point
   * symbol registration in caller's namespace is more robust
 
