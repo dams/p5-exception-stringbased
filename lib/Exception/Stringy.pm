@@ -457,9 +457,13 @@ sub import {
 
     my $method_prefix = dor($options{method_prefix}, 'x');
 
-    do {
+    foreach (@symbols) {
+        defined ${"${caller}::${method_prefix}$_"}
+          and next;
+        defined ${"${class}::_symbol_$_"}
+          or next;
         *{"${caller}::${method_prefix}$_"} = \${"${class}::_symbol_$_"}
-        } foreach @symbols;
+    } 
 
     foreach my $k (keys %throw_aliases) {
         my $v = $throw_aliases{$k};
@@ -558,7 +562,7 @@ sub registered_exception_classes { keys %registered }
 # fake methods (class methods with exception as first argument)
 
 $_symbol_throw   = sub { croak $_[0] };
-$_symbol_rethrow = sub { croak $_[0] };
+$_symbol_rethrow = sub { die $_[0] };
 $_symbol_raise   = sub { croak $_[0] };
 
 $_symbol_class = sub {
