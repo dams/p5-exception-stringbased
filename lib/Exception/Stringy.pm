@@ -434,6 +434,8 @@ my %name_aliases;
 use MIME::Base64;
 
 sub _encode {
+    defined $_[0]
+      or return '';
     $_[0] =~ $field_value_r
       and return $_[0];
     "\034" . encode_base64($_[0], '');
