@@ -288,7 +288,7 @@ C<$xisa> is more useful than it seems:
 
 =item *
 
-When applied on an C<Exception::Stringy> exception, it'll properly etract the
+When applied on an C<Exception::Stringy> exception, it'll properly extract the
 exception class and perform the C<isa> call on it.
 
 =item *
@@ -301,7 +301,7 @@ When applied on something else, it won't die, but return false.
 
 =back
 
-So it means that you can safely use C<$exception->$xisa('SomeClass')> whatever
+So it means that you can safely use C<< $exception->$xisa('SomeClass') >> whatever
 C<$exception> is, no need to do additional testing on it.
 
 =head2 $xfields()
@@ -354,7 +354,7 @@ Set or get the error message of the exception
 It's often useful to gather exceptions declarations in a common module. You can
 easily do that, because declaring new exceptions is decoupled from C<use>-ing
 the module. All you need is to implement a module that uses
-C<<Exception::Stringy->declare_exceptions(...)>> one or more times. Other
+C<< Exception::Stringy->declare_exceptions(...) >> one or more times. Other
 modules can then use this module. Note however that they also will have to
 C<use> C<Exception::Stringy> to have pseudo-methods imported in their
 namespaces.
@@ -374,7 +374,7 @@ C<Exception::Stringy> exceptions, and some other exceptions being objects
 (blessedd references), for example coming from C<Exception::Class>.
 
 In this case, I recommend using C<$xisa> method to handle them appropriately,
-as C<$exception->$xisa('SomeClass')> will work on any type of C<$exception>,
+as C<< $exception->$xisa('SomeClass') >> will work on any type of C<$exception>,
 and will not die. Instead, it'll always return a true or false value.
 
 =head1 IMPORT OPTIONS
